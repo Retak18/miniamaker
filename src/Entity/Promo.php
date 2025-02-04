@@ -6,6 +6,7 @@ use App\Repository\PromoRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PromoRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Promo
 {
     #[ORM\Id]
@@ -21,7 +22,7 @@ class Promo
 
     #[ORM\ManyToOne(inversedBy: 'promos')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Subscription $subscription_id = null;
+    private ?Subscription $subscription = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
@@ -29,19 +30,25 @@ class Promo
     #[ORM\Column]
     private ?\DateTimeImmutable $updated_at = null;
 
+    public function __construct()
+    {
+        $this->name = 'MINI' . (new \DateTime())->format('m');
+        $this->percent = 0;
+    }
 
     #[ORM\PrePersist]
-    public function setCreatedAtValue()
+    public function prePersist(): void
     {
         $this->created_at = new \DateTimeImmutable();
         $this->updated_at = new \DateTimeImmutable();
     }
+
     #[ORM\PreUpdate]
-    public function setUpdatedAtValue()
+    public function preUpdate(): void
     {
-        $this->created_at = new \DateTimeImmutable();
-        
+        $this->updated_at = new \DateTimeImmutable();
     }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -71,14 +78,14 @@ class Promo
         return $this;
     }
 
-    public function getSubscriptionId(): ?Subscription
+    public function getSubscription(): ?Subscription
     {
-        return $this->subscription_id;
+        return $this->subscription;
     }
 
-    public function setSubscriptionId(?Subscription $subscription_id): static
+    public function setSubscription(?Subscription $subscription): static
     {
-        $this->subscription_id = $subscription_id;
+        $this->subscription = $subscription;
 
         return $this;
     }
@@ -105,5 +112,10 @@ class Promo
         $this->updated_at = $updated_at;
 
         return $this;
+    }
+
+    public function __toString()
+    {
+        $this->name;
     }
 }

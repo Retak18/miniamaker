@@ -6,9 +6,9 @@ use App\Repository\DetailRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-#[ORM\HasLifecycleCallbacks]  // Gestion des created et updated
 
 #[ORM\Entity(repositoryClass: DetailRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Detail
 {
     #[ORM\Id]
@@ -23,9 +23,9 @@ class Detail
     private ?string $company_name = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $adress = null;
+    private ?string $address = null;
 
-    #[ORM\Column(length: 80)]
+    #[ORM\Column(length: 255)]
     private ?string $city = null;
 
     #[ORM\Column(length: 80)]
@@ -59,15 +59,12 @@ class Detail
     /**
      * @var Collection<int, LandingPage>
      */
-    #[ORM\OneToMany(targetEntity: LandingPage::class, mappedBy: 'detail_id')]
+    #[ORM\OneToMany(targetEntity: LandingPage::class, mappedBy: 'detail', orphanRemoval: true)]
     private Collection $landingPages;
 
-   /**
-     * Constructeur pour gérer les attrinuts non-nullables par défault
-     */
     public function __construct()
     {
-        $this->country = "FR";
+        $this->country = "FR" ;
         $this->portfolio_check = false;
         $this->strikes = 0;
         $this->is_banned = false;
@@ -79,11 +76,11 @@ class Detail
     {
         $this->created_at = new \DateTimeImmutable();
     }
+
     #[ORM\PreUpdate]
     public function setUpdatedAtValue()
     {
-        $this->created_at = new \DateTimeImmutable();
-        
+        $this->updated_at = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -115,21 +112,22 @@ class Detail
         return $this;
     }
 
-    public function getFullAdress(): ?string
+    public function getFullAddress(): ?string
     {
-        return $this->adress.
-        ','.$this->postal_code.
-        ''.$this->city.
-        ','.$this->country;
-    }
-    public function getAdress(): ?string
-    {
-        return $this->adress;
+        return $this->address . 
+        ', ' . $this->postal_code . 
+        ' ' . $this->city . 
+        ', ' . $this->country;
     }
 
-    public function setAdress(string $adress): static
+    public function getAddress(): ?string
     {
-        $this->adress = $adress;
+        return $this->address;
+    }
+
+    public function setAddress(string $address): static
+    {
+        $this->address = $address;
 
         return $this;
     }
@@ -213,11 +211,9 @@ class Detail
 
     public function setIsBanned(): static
     {
-        if($this->strikes > 1){
-            
+        if($this->strikes > 1) {
             $this->is_banned = true;
         }
-
         return $this;
     }
 
@@ -257,6 +253,7 @@ class Detail
         return $this;
     }
 
+    // Indispensable
     public function __toString()
     {
         return $this->company_name;
@@ -274,7 +271,7 @@ class Detail
     {
         if (!$this->landingPages->contains($landingPage)) {
             $this->landingPages->add($landingPage);
-            $landingPage->setDetailId($this);
+            $landingPage->setDetail($this);
         }
 
         return $this;
@@ -284,8 +281,8 @@ class Detail
     {
         if ($this->landingPages->removeElement($landingPage)) {
             // set the owning side to null (unless already changed)
-            if ($landingPage->getDetailId() === $this) {
-                $landingPage->setDetailId(null);
+            if ($landingPage->getDetail() === $this) {
+                $landingPage->setDetail(null);
             }
         }
 

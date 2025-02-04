@@ -5,10 +5,10 @@ namespace App\Entity;
 use App\Repository\SubscriptionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SubscriptionRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Subscription
 {
     #[ORM\Id]
@@ -16,12 +16,23 @@ class Subscription
     #[ORM\Column]
     private ?int $id = null;
 
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'subscription')]
+    private Collection $clients;
+
     #[ORM\Column]
     private ?bool $is_active = null;
 
- 
+    #[ORM\Column(
+        type: 'decimal', 
+        precision: 7, // Nombre total ex. 10 000,00
+        scale: 2, // Nombre de décimales ex. 2 = 0,00
+        )]
+    private ?int $amount = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 80)]
     private ?string $frequency = null;
 
     #[ORM\Column]
@@ -30,39 +41,32 @@ class Subscription
     #[ORM\Column]
     private ?\DateTimeImmutable $updated_at = null;
 
-    #[ORM\OneToOne(inversedBy: 'subscription', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $pro_id = null;
-
     /**
      * @var Collection<int, Promo>
      */
-    #[ORM\OneToMany(targetEntity: Promo::class, mappedBy: 'subscription_id')]
+    #[ORM\OneToMany(targetEntity: Promo::class, mappedBy: 'subscription')]
     private Collection $promos;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
-    private ?string $amount = null;
-
-  
+    public function __construct()
+    {
+        $this->promos = new ArrayCollection();
+        $this->clients = new ArrayCollection();
+        $this->is_active = false;
+        $this->amount = 99.97;
+        $this->frequency = 'monthly';
+    }
 
     #[ORM\PrePersist]
-    public function setCreatedAtValue()
+    public function prePersist(): void
     {
         $this->created_at = new \DateTimeImmutable();
         $this->updated_at = new \DateTimeImmutable();
     }
+
     #[ORM\PreUpdate]
-    public function setUpdatedAtValue()
+    public function preUpdate(): void
     {
-        $this->created_at = new \DateTimeImmutable();
-        
-    }
-    public function __construct()
-    {
-        $this->promos = new ArrayCollection();
-        $this->is_active = false;
-        $this->amount = 99.97;
-        $this->frequency = 'monthly';
+        $this->updated_at = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -82,7 +86,17 @@ class Subscription
         return $this;
     }
 
+    public function getAmount(): ?int
+    {
+        return $this->amount;
+    }
 
+    public function setAmount(int $amount): static
+    {
+        $this->amount = $amount;
+
+        return $this;
+    }
 
     public function getFrequency(): ?string
     {
@@ -120,18 +134,6 @@ class Subscription
         return $this;
     }
 
-    public function getProId(): ?User
-    {
-        return $this->pro_id;
-    }
-
-    public function setProId(User $pro_id): static
-    {
-        $this->pro_id = $pro_id;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Promo>
      */
@@ -144,7 +146,7 @@ class Subscription
     {
         if (!$this->promos->contains($promo)) {
             $this->promos->add($promo);
-            $promo->setSubscriptionId($this);
+            $promo->setSubscription($this);
         }
 
         return $this;
@@ -154,22 +156,40 @@ class Subscription
     {
         if ($this->promos->removeElement($promo)) {
             // set the owning side to null (unless already changed)
-            if ($promo->getSubscriptionId() === $this) {
-                $promo->setSubscriptionId(null);
+            if ($promo->getSubscription() === $this) {
+                $promo->setSubscription(null);
             }
         }
 
         return $this;
     }
 
-    public function getAmount(): ?string
+    /**
+     * @return Collection<int, User>
+     */
+    public function getClients(): Collection
     {
-        return $this->amount;
+        return $this->clients;
     }
 
-    public function setAmount(string $amount): static
+    public function addClient(User $client): static
     {
-        $this->amount = $amount;
+        if (!$this->clients->contains($client)) {
+            $this->clients->add($client);
+            $client->setSubscription($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClient(User $client): static
+    {
+        if ($this->clients->removeElement($client)) {
+            // set the owning side to null (unless already changed)
+            if ($client->getSubscription() === $this) {
+                $client->setSubscription($this);
+            }
+        }
 
         return $this;
     }

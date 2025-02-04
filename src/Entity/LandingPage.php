@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: LandingPageRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class LandingPage
 {
     #[ORM\Id]
@@ -17,7 +18,7 @@ class LandingPage
 
     #[ORM\ManyToOne(inversedBy: 'landingPages')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?detail $detail_id = null;
+    private ?Detail $detail = null;
 
     #[ORM\Column(length: 80)]
     private ?string $type = null;
@@ -29,29 +30,31 @@ class LandingPage
     private ?\DateTimeImmutable $updated_at = null;
 
     /**
-     * @var Collection<int, tag>
+     * @var Collection<int, Tag>
      */
-    #[ORM\ManyToMany(targetEntity: tag::class, inversedBy: 'landingPages')]
+    #[ORM\ManyToMany(targetEntity: Tag::class, mappedBy: 'landingPages')]
     private Collection $tags;
 
-    #[ORM\OneToOne(mappedBy: 'landing_page', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'landingPage', cascade: ['persist', 'remove'])]
     private ?LpContent $lpContent = null;
 
+    public function __construct()
+    {
+        $this->tags = new ArrayCollection();
+        $this->type = 'miniature';
+    }
+
     #[ORM\PrePersist]
-    public function setCreatedAtValue()
+    public function prePersist(): void
     {
         $this->created_at = new \DateTimeImmutable();
         $this->updated_at = new \DateTimeImmutable();
     }
+
     #[ORM\PreUpdate]
-    public function setUpdatedAtValue()
+    public function preUpdate(): void
     {
-        $this->created_at = new \DateTimeImmutable();
-        
-    }
-    public function __construct()
-    {
-        $this->tags = new ArrayCollection();
+        $this->updated_at = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -59,14 +62,14 @@ class LandingPage
         return $this->id;
     }
 
-    public function getDetailId(): ?detail
+    public function getDetail(): ?Detail
     {
-        return $this->detail_id;
+        return $this->detail;
     }
 
-    public function setDetailId(?detail $detail_id): static
+    public function setDetail(?Detail $detail): static
     {
-        $this->detail_id = $detail_id;
+        $this->detail = $detail;
 
         return $this;
     }
@@ -108,25 +111,28 @@ class LandingPage
     }
 
     /**
-     * @return Collection<int, tag>
+     * @return Collection<int, Tag>
      */
     public function getTags(): Collection
     {
         return $this->tags;
     }
 
-    public function addTag(tag $tag): static
+    public function addTag(Tag $tag): static
     {
         if (!$this->tags->contains($tag)) {
             $this->tags->add($tag);
+            $tag->addLandingPage($this);
         }
 
         return $this;
     }
 
-    public function removeTag(tag $tag): static
+    public function removeTag(Tag $tag): static
     {
-        $this->tags->removeElement($tag);
+        if ($this->tags->removeElement($tag)) {
+            $tag->removeLandingPage($this);
+        }
 
         return $this;
     }
