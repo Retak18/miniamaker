@@ -62,6 +62,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $isVerified = false;
 
+    #[ORM\OneToOne(mappedBy: 'pro_id', cascade: ['persist', 'remove'])]
+    private ?Subscription $subscription = null;
+
     /**
      * Constructeur pour gérer les attrinuts non-nullables par défault
      */
@@ -76,6 +79,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setCreatedAtValue()
     {
         $this->created_at = new \DateTimeImmutable();
+        $this->updated_at = new \DateTimeImmutable();
     }
     #[ORM\PreUpdate]
     public function setUpdatedAtValue()
@@ -267,6 +271,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsVerified(bool $isVerified): static
     {
         $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    public function getSubscription(): ?Subscription
+    {
+        return $this->subscription;
+    }
+
+    public function setSubscription(Subscription $subscription): static
+    {
+        // set the owning side of the relation if necessary
+        if ($subscription->getProId() !== $this) {
+            $subscription->setProId($this);
+        }
+
+        $this->subscription = $subscription;
 
         return $this;
     }
