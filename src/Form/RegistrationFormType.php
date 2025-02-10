@@ -32,6 +32,7 @@ class RegistrationFormType extends AbstractType
             ])
             ->add('plainPassword', RepeatedType::class, [
                 'label' => 'Mot de passe',
+                'toggle' => true,
                 'label_attr' => [ 'class' => 'form-label'],
                 'type' => PasswordType::class, //  avec quoi tu es associé à la répétition
                 'invalid_message' => 'Les mots de passe doivent être identiques.',
