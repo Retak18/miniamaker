@@ -24,3 +24,9 @@
 /assets/vendor/
 ###< symfony/asset-mapper ###
 migrations/Version20250203130744.php
+
+###> liip/imagine-bundle ###
+/public/media/cache/
+###< liip/imagine-bundle ###
+.DS_Store
+*/*.DS_Store
