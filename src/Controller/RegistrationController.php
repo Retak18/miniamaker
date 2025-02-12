@@ -27,10 +27,11 @@ class RegistrationController extends AbstractController
     #[Route('/inscription', name: 'app_register')]
     public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager): Response
     {
-        if($this->getUser()){
+        // Si déjà connecté, on redirige
+        if($this->getUser()) {
             return $this->redirectToRoute('app_profile');
         }
-        
+
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
@@ -48,7 +49,7 @@ class RegistrationController extends AbstractController
             // generate a signed url and email it to the user
             $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
                 (new TemplatedEmail())
-                    ->from(new Address('contacct@miniamaker.fr', 'miniamaker'))
+                    ->from(new Address('contact@miniamaker.fr', 'miniamaker'))
                     ->to((string) $user->getEmail())
                     ->subject('Please Confirm your Email')
                     ->htmlTemplate('registration/confirmation_email.html.twig')
@@ -89,7 +90,7 @@ class RegistrationController extends AbstractController
         }
 
         // @TODO Change the redirect on success and handle or remove the flash message in your templates
-        $this->addFlash('success', 'Votre adresse e-mail à été vérifiée. Merci.');
+        $this->addFlash('success', 'Votre adresse e-mail à bien été vérifiée. Merci.');
 
         return $this->redirectToRoute('app_profile');
     }

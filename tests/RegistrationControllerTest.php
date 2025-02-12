@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Tests;
 
 use App\Repository\UserRepository;
@@ -54,7 +55,7 @@ class RegistrationControllerTest extends WebTestCase
         self::assertEmailCount(1);
 
         self::assertCount(1, $messages = $this->getMailerMessages());
-        self::assertEmailAddressContains($messages[0], 'from', 'contacct@miniamaker.fr');
+        self::assertEmailAddressContains($messages[0], 'from', 'contact@miniamaker.fr');
         self::assertEmailAddressContains($messages[0], 'to', 'me@example.com');
         self::assertEmailTextBodyContains($messages[0], 'This link will expire in 1 hour.');
 
