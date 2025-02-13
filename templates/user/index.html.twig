@@ -49,7 +49,7 @@
                                 </div>
                                 <div class="card-body">
                                     <p class="mb-3">
-                                        {{ app.user.subscription.name ?? 'Aucun abonnement actuellement' }}
+                                        {{ app.user.subscription.amount ?? 'Aucun abonnement actuellement' }}
                                     </p>
                                     {% if app.user.subscription is null or app.user.subscription.isActive == false  %}
                                     <form action="{{ path('app_subscription') }}" method="post">

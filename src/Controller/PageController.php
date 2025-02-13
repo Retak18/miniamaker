@@ -22,10 +22,14 @@ final class PageController extends AbstractController
                 "ip" => $request->getClientIp(),
                 "userAgent" => $request->headers->get('user-agent'),
             ];
+                
 
             // Lancement du LoginHistoryService s'il vient de la connexion
             if ($requestArray['fromLogin'] === $requestArray['referer']) {
                 $lhs->addHistory($this->getUser(), $requestArray['userAgent'], $requestArray['ip']);
+                // dd('hi');
+                $lhs->sendLoginNotification($this->getUser());
+                
             }
 
             // Vérification du profil complet d'utilisateur

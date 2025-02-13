@@ -18,7 +18,7 @@ class LoginHistory
     private ?User $user = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $login_at = null;
+    private ?\DateTimeImmutable $login_date = null;
 
     #[ORM\Column(length: 255)]
     private ?string $ip_address = null;
@@ -34,7 +34,7 @@ class LoginHistory
 
     public function __construct()
     {
-        $this->login_at = new \DateTimeImmutable();
+        $this->login_date = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -54,14 +54,14 @@ class LoginHistory
         return $this;
     }
 
-    public function getLoginAt(): ?\DateTimeImmutable
+    public function getLoginDate(): ?\DateTimeImmutable
     {
-        return $this->login_at;
+        return $this->login_date;
     }
 
-    public function setLoginAt(\DateTimeImmutable $login_at): static
+    public function setLoginDate(\DateTimeImmutable $login_date): static
     {
-        $this->login_at = $login_at;
+        $this->login_date = $login_date;
 
         return $this;
     }

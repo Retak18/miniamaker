@@ -61,11 +61,11 @@ class PaymentService
                 ]],
                 'mode' => 'subscription', // Mode de paiement
                 // Redirection après le paiement (réussi ou échoué)
-                'success_url' => $this->urlGenerator->generate('app_subscription_success', 
-                    ['session_id' => '{CHECKOUT_SESSION_ID}'], 
+                'success_url' => $this->urlGenerator->generate('app_subscription_success',
+                    ['session_id' => '{CHECKOUT_SESSION_ID}'],
                     UrlGeneratorInterface::ABSOLUTE_URL
                 ),
-                'cancel_url' => $this->urlGenerator->generate('app_subscription_cancel', 
+                'cancel_url' => $this->urlGenerator->generate('app_subscription_cancel',
                     [], 
                     UrlGeneratorInterface::ABSOLUTE_URL
                 ),
