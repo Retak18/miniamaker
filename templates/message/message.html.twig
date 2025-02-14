@@ -1,0 +1,11 @@
+{% block body %}
+    <div class="bubble {{ item.user == app.user ? 'bg-indigo-200 ms-auto' : 'bg-fuchsia-200' }}">
+                    <p class="">{{ item.content }}</p>
+                </div>
+                <p class="help pb-0 mb-0 fst-italic {{ item.user and item.user.username == app.user.username ? 'text-end' : 'text-start' }}">
+    {{ item.user ? (item.user.username == app.user.username ? 'moi' : item.user.username) : 'Utilisateur inconnu' }},
+    il y a {{ item.createdAt|time_diff }}
+                <img src="{{ asset(item.user.image ? 'medias/images/' ~ item.user.image : 'medias/images/default.png') }}" 
+     alt="{{ item.user ? item.user.username : 'Utilisateur inconnu' }}" width="20">
+                </p>
+{% endblock %}
